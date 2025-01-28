@@ -1,37 +1,41 @@
 name: Run Floorsheet Notebook Daily
 
-# Trigger the workflow on a schedule
 on:
   schedule:
-    - cron: '0 6 * * *'  # Runs daily at 6 AM UTC (adjust as needed)
-  workflow_dispatch:  # Enables manual runs
+    - cron: '0 6 * * *'  # Runs daily at 6 AM UTC
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   execute-notebook:
-    runs-on: ubuntu-latest  # Use GitHub's Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Set up Python
+      # Step 2: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
-      # Step 3: Install dependencies
+      # Step 3: Install Jupyter and dependencies
       - name: Install dependencies
         run: |
-          pip install nbconvert papermill pandas selenium beautifulsoup4
+          pip install nbconvert papermill pandas selenium beautifulsoup4 jupyter
 
-      # Step 4: Run the notebook
+      # Step 4: Add the correct Python kernel
+      - name: Install Python kernel
+        run: |
+          python -m ipykernel install --user --name=python3
+
+      # Step 5: Execute the notebook
       - name: Execute notebook
         run: |
           papermill floorsheet.ipynb output_floorsheet.ipynb
 
-      # Step 5 (Optional): Upload executed notebook as artifact
+      # Step 6: Upload the executed notebook (Optional)
       - name: Upload executed notebook
         uses: actions/upload-artifact@v3
         with:
